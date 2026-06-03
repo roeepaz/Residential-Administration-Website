@@ -336,7 +336,7 @@ export default function App() {
     setTaskModal({ open: true, task: t, section });
   };
 
-  const handleSaveTask = (text, owner, assignedTenantId) => {
+  const handleSaveTask = (text, owner, assignedTenantId, contractorName, contractorPhone) => {
     const { task, section } = taskModal;
 
     setState(prev => {
@@ -344,10 +344,10 @@ export default function App() {
       if (task?.id) {
         const idx = list.findIndex(t => t.id === task.id);
         if (idx !== -1) {
-          list[idx] = { ...list[idx], text, owner, assignedTenantId };
+          list[idx] = { ...list[idx], text, owner, assignedTenantId, contractorName, contractorPhone };
         }
       } else {
-        list.push({ id: uid(), text, owner, assignedTenantId, done: false });
+        list.push({ id: uid(), text, owner, assignedTenantId, contractorName, contractorPhone, done: false });
       }
       return { ...prev, tasks: { ...prev.tasks, [section]: list } };
     });
@@ -526,33 +526,29 @@ export default function App() {
       {/* TOPBAR */}
       <div className="topbar">
         <div className="topbar-right">
-          <div className="topbar-title">🏠 ניהול מגורים <span>צה״ל</span></div>
+          <div className="topbar-title">🏠 ניהול מגורים <span>מה"ן</span></div>
         </div>
         <div className="topbar-left">
           <div className="tabs">
             <button className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
-              <HomeIcon /> סקירה
+              <HomeIcon /> <span>סקירה</span>
             </button>
             <button className={`tab-btn ${activeTab === 'tasks' ? 'active' : ''}`} onClick={() => setActiveTab('tasks')}>
-              <TasksIcon /> תקלות ומשימות
-            </button>
-            <button className={`tab-btn ${activeTab === 'rooms' ? 'active' : ''}`} onClick={() => setActiveTab('rooms')}>
-              <RoomsIcon /> חדרים
-            </button>
-            <button className={`tab-btn ${activeTab === 'tenants' ? 'active' : ''}`} onClick={() => setActiveTab('tenants')}>
-              <TenantsIcon /> דיירים
+              <TasksIcon /> <span>תקלות</span>
             </button>
             <button className={`tab-btn ${activeTab === 'rotation' ? 'active' : ''}`} onClick={() => setActiveTab('rotation')}>
-              <RotationIcon /> סבב תפקידים
+              <RotationIcon /> <span>סבב תפקידים</span>
+            </button>
+            <button className={`tab-btn ${activeTab === 'tenants' ? 'active' : ''}`} onClick={() => setActiveTab('tenants')}>
+              <TenantsIcon /> <span>דיירים</span>
+            </button>
+            <button className={`tab-btn ${activeTab === 'rooms' ? 'active' : ''}`} onClick={() => setActiveTab('rooms')}>
+              <RoomsIcon /> <span>חדרים</span>
             </button>
             <button className={`tab-btn ${activeTab === 'priorities' ? 'active' : ''}`} onClick={() => setActiveTab('priorities')}>
-              <PrioritiesIcon /> עדיפויות
+              <PrioritiesIcon /> <span>עדיפויות</span>
             </button>
           </div>
-
-          <button className="theme-toggle" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">
-            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-          </button>
         </div>
       </div>
 
@@ -663,6 +659,11 @@ export default function App() {
         onSave={handleSaveTenant}
         onClose={() => setTenantModal({ open: false, tenant: null })}
       />
+
+      {/* Floating Theme Toggle */}
+      <button className="theme-toggle" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">
+        {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+      </button>
     </>
   );
 }

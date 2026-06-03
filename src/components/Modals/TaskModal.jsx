@@ -5,6 +5,8 @@ export default function TaskModal({ isOpen, task, tenants = [], rooms = {}, onSa
   const [text, setText] = useState(task?.text || '');
   const [assignedTenantId, setAssignedTenantId] = useState(task?.assignedTenantId || '');
   const [owner, setOwner] = useState(task?.owner || '');
+  const [contractorName, setContractorName] = useState(task?.contractorName || '');
+  const [contractorPhone, setContractorPhone] = useState(task?.contractorPhone || '');
 
   if (!isOpen) return null;
 
@@ -17,7 +19,7 @@ export default function TaskModal({ isOpen, task, tenants = [], rooms = {}, onSa
   const handleSave = () => {
     const trimmedText = text.trim();
     if (!trimmedText) return;
-    onSave(trimmedText, owner.trim(), assignedTenantId);
+    onSave(trimmedText, owner.trim(), assignedTenantId, contractorName.trim(), contractorPhone.trim());
   };
 
   return (
@@ -56,6 +58,26 @@ export default function TaskModal({ isOpen, task, tenants = [], rooms = {}, onSa
                 );
               })}
           </select>
+        </div>
+        <div className="modal-group">
+          <label htmlFor="task-contractor-name">שם בעל המקצוע (אופציונלי)</label>
+          <input
+            id="task-contractor-name"
+            type="text"
+            placeholder="למשל: משה האינסטלטור, שירות מזגנים..."
+            value={contractorName}
+            onChange={(e) => setContractorName(e.target.value)}
+          />
+        </div>
+        <div className="modal-group">
+          <label htmlFor="task-contractor-phone">טלפון בעל המקצוע (אופציונלי)</label>
+          <input
+            id="task-contractor-phone"
+            type="tel"
+            placeholder="למשל: 052-1234567"
+            value={contractorPhone}
+            onChange={(e) => setContractorPhone(e.target.value)}
+          />
         </div>
         <div className="modal-group">
           <label htmlFor="task-owner">הערת סטטוס / גורם מטפל נוסף (אופציונלי)</label>
