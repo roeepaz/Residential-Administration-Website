@@ -230,13 +230,9 @@ export default function App() {
       return sum + (state.tasks[sec] || []).filter(t => !t.done).length;
     }, 0);
 
-    const occupiedRooms = ['chogerim', 'kzinim', 'chogrot'].reduce((sum, sec) => {
-      return sum + (state.rooms[sec] || []).filter(r => (state.tenants || []).some(t => t.roomId === r.id)).length;
-    }, 0);
-
     const totalSoldiers = (state.tenants || []).length;
 
-    return { openTasks, occupiedRooms, totalSoldiers };
+    return { openTasks, totalSoldiers };
   }, [state]);
 
   // ─── ROTATION LOGIC ───

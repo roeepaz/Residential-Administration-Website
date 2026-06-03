@@ -1,5 +1,8 @@
 
 
+// WhatsApp group invite link
+const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/EQ5XDj7Y6KaHcwM6eHRLlb';
+
 export default function RotationTab({
   state,
   nextGuardRoomId,
@@ -10,6 +13,42 @@ export default function RotationTab({
   const roomsChogerim = state.rooms.chogerim || [];
   const nextGuardRoom = roomsChogerim.find(r => r.id === nextGuardRoomId);
 
+  const handleCleanerClick = () => {
+    if (!currentCleanerRoom) return;
+
+    const occupantNames = (state.tenants || [])
+      .filter(t => t.roomId === currentCleanerRoom.id)
+      .map(t => t.name)
+      .join(', ');
+
+    const roomDetails = occupantNames
+      ? `חדר ${currentCleanerRoom.num} (${occupantNames})`
+      : `חדר ${currentCleanerRoom.num}`;
+
+    const confirmMessage = `האם ברצונך לשלוח הודעת WhatsApp לגבי ${roomDetails}?`;
+
+    if (window.confirm(confirmMessage)) {
+      const messageText = `חדר ${currentCleanerRoom.num} מנקה השבוע.
+
+ביום שני- פחים פלוס לכלוך באזור הכיורים.
+יום רביעי- פחים, שטיפה מלאה, כיורים`;
+
+      // Copy to clipboard, alert user, and open group chat link
+      navigator.clipboard.writeText(messageText)
+        .then(() => {
+          alert('ההודעה הועתקה ללוח! כעת תיפתח קבוצת הוואטסאפ, אנא הדבק (Ctrl+V) ושלח.');
+          window.open(WHATSAPP_GROUP_LINK, '_blank', 'noopener,noreferrer');
+        })
+        .catch(err => {
+          console.error('Failed to copy text: ', err);
+          // Fallback in case navigator.clipboard is not supported or blocked
+          const encodedText = encodeURIComponent(messageText);
+          const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+          window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+        });
+    }
+  };
+
   return (
     <div className="page">
       <div className="glass-panel card" style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -18,7 +57,11 @@ export default function RotationTab({
         </div>
 
         <div className="rotation-info">
-          <div className="rotation-box">
+          <div
+            className={`rotation-box ${currentCleanerRoom ? 'clickable' : ''}`}
+            onClick={currentCleanerRoom ? handleCleanerClick : undefined}
+            title={currentCleanerRoom ? "לחץ כדי לשלוח הודעה בוואטסאפ" : undefined}
+          >
             <div className="label">🧹 מנקה שירותים השבוע</div>
             <div className="value green">{currentCleanerRoom ? `חדר ${currentCleanerRoom.num}` : '—'}</div>
           </div>

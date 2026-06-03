@@ -265,7 +265,7 @@ body.light-mode .tab-btn.active {
 /* STATS */
 .status-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   margin-bottom: 32px;
 }
@@ -739,7 +739,7 @@ hr {
     grid-template-columns: repeat(2, 1fr);
   }
   .status-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -824,4 +824,21 @@ hr {
   transform: scale(1.2);
   color: #20ba5a;
 }
+
+.rotation-box.clickable {
+  cursor: pointer;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.rotation-box.clickable:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--primary-rgb), 0.4);
+  box-shadow: var(--shadow-sm);
+  background: rgba(var(--bg-tertiary), 0.45);
+}
+
+.rotation-box.clickable:active {
+  transform: translateY(0);
+}
+
 

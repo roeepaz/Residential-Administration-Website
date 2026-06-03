@@ -15,10 +15,6 @@ export default function OverviewTab({
           <div className="stat-num blue">{stats.openTasks}</div>
           <div className="stat-label">תקלות פתוחות</div>
         </div>
-        <div className="glass-panel stat-card success">
-          <div className="stat-num green">{stats.occupiedRooms}</div>
-          <div className="stat-label">חדרים מאוכלסים</div>
-        </div>
         <div className="glass-panel stat-card warning">
           <div className="stat-num amber">{stats.totalSoldiers}</div>
           <div className="stat-label">סך הכל חיילים במגורים</div>
