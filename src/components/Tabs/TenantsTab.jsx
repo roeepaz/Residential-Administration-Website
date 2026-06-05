@@ -12,7 +12,9 @@ export default function TenantsTab({
   toggleTask,
   openAddTenant,
   openEditTenant,
-  deleteTenant
+  deleteTenant,
+  incrementHanfatsot,
+  decrementHanfatsot
 }) {
   return (
     <div className="page">
@@ -62,63 +64,93 @@ export default function TenantsTab({
             }, []);
 
             return (
-              <div className="glass-panel card tenant-card" key={t.id} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <h4 style={{ fontSize: '1.2rem', fontWeight: '800' }}>{t.name}</h4>
-                    <span className={`badge ${t.section === 'chogerim' ? 'badge-blue' : t.section === 'kzinim' ? 'badge-amber' : 'badge-green'}`} style={{ marginTop: '4px' }}>
+              <div className="glass-panel card tenant-card" key={t.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px 16px' }}>
+                {/* Row 1: Header (Name, Population Badge, Room Number, Edit button) */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <h4 style={{ fontSize: '1.05rem', fontWeight: '800' }}>{t.name}</h4>
+                    <span className={`badge ${t.section === 'chogerim' ? 'badge-blue' : t.section === 'kzinim' ? 'badge-amber' : 'badge-green'}`} style={{ padding: '2px 8px', fontSize: '0.7rem' }}>
                       {t.section === 'chogerim' ? 'חוגר' : t.section === 'kzinim' ? 'קצין' : 'חוגרת'}
                     </span>
+                    <span className="badge badge-blue num-font" style={{ padding: '2px 8px', fontSize: '0.72rem', background: 'rgba(59, 130, 246, 0.08)' }} title="חדר">
+                      🔑 {room ? room.num : 'ללא חדר'}
+                    </span>
                   </div>
-                  <div className="task-actions" style={{ opacity: 1 }}>
-                    <button className="icon-btn" onClick={() => openEditTenant(t.id)} aria-label="ערוך דייר"><EditIcon /></button>
-                    <button className="icon-btn del" onClick={() => deleteTenant(t.id)} aria-label="מחק דייר"><DeleteIcon /></button>
-                  </div>
+                  <button 
+                    className="icon-btn" 
+                    style={{ width: '32px', height: '32px' }} 
+                    onClick={() => openEditTenant(t.id)} 
+                    aria-label="ערוך דייר"
+                  >
+                    <EditIcon />
+                  </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    🔑 <strong>חדר:</strong> {room ? `חדר ${room.num}` : <span style={{ fontStyle: 'italic' }}>ללא חדר</span>}
+                {/* Row 2: Phone & City (Compact horizontal list) */}
+                {(t.phone || t.city) && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                    {t.phone && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        📞 <a href={`tel:${t.phone}`} style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: '600' }}>{t.phone}</a>
+                        {getWhatsAppLink(t.phone) && (
+                          <a href={getWhatsAppLink(t.phone)} target="_blank" rel="noreferrer" className="whatsapp-link" style={{ width: '22px', height: '22px', marginInlineStart: '4px' }} title="WhatsApp">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.588 2.028 14.12 1.001 11.49 1c-5.447 0-9.873 4.372-9.877 9.802-.001 1.77.469 3.5 1.36 5.009L2.094 21.8l6.183-1.614c1.554.849 3.2 1.291 4.793 1.291z" />
+                            </svg>
+                          </a>
+                        )}
+                      </div>
+                    )}
+                    {t.phone && t.city && <span style={{ opacity: 0.4 }}>•</span>}
+                    {t.city && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        📍 {t.city}
+                      </div>
+                    )}
                   </div>
-                  {t.phone && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      📞 <strong>טלפון:</strong>
-                      <a href={`tel:${t.phone}`} style={{ color: 'var(--primary)', textDecoration: 'none' }}>{t.phone}</a>
-                      {getWhatsAppLink(t.phone) && (
-                        <a href={getWhatsAppLink(t.phone)} target="_blank" rel="noreferrer" className="whatsapp-link" title="שלח הודעת WhatsApp">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.588 2.028 14.12 1.001 11.49 1c-5.447 0-9.873 4.372-9.877 9.802-.001 1.77.469 3.5 1.36 5.009L2.094 21.8l6.183-1.614c1.554.849 3.2 1.291 4.793 1.291z" />
-                          </svg>
-                        </a>
-                      )}
-                    </div>
-                  )}
-                  {t.city && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      📍 <strong>עיר:</strong> {t.city}
-                    </div>
-                  )}
-                </div>
+                )}
 
-                {/* Tenant Tasks */}
-                <div style={{ marginTop: '8px', borderTop: '1px solid var(--border-color)', paddingTop: '8px' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: '700', marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                    📋 תקלות ומשימות פתוחות ({tenantTasks.length})
+                {/* Row 3: Hanfatsot (Compact) */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: 'rgba(255, 255, 255, 0.015)',
+                  border: '1px solid var(--border-color)',
+                  padding: '6px 10px',
+                  borderRadius: 'var(--radius-sm)',
+                  marginTop: '2px'
+                }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: '700' }}>
+                    🪖 הנפצות שבוצעו:
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      className="icon-btn"
+                      style={{ width: '26px', height: '26px', fontSize: '0.9rem', fontWeight: '700' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        decrementHanfatsot(t.id);
+                      }}
+                      title="הורד הנפצה"
+                    >
+                      -
+                    </button>
+                    <span className="num-font" style={{ fontWeight: '800', fontSize: '0.95rem', minWidth: '16px', textAlign: 'center' }}>
+                      {t.hanfatsot || 0}
+                    </span>
+                    <button
+                      className="icon-btn"
+                      style={{ width: '26px', height: '26px', fontSize: '0.9rem', fontWeight: '700', color: 'var(--success)', borderColor: 'rgba(34,197,94,0.3)' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        incrementHanfatsot(t.id);
+                      }}
+                      title="הוסף הנפצה"
+                    >
+                      +
+                    </button>
                   </div>
-                  {tenantTasks.length === 0 ? (
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>אין משימות פתוחות</div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      {tenantTasks.map(task => (
-                        <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', background: 'rgba(255, 255, 255, 0.02)', padding: '4px 8px', borderRadius: '4px' }}>
-                          <div className="task-check" style={{ width: '16px', height: '16px', borderRadius: '4px' }} onClick={() => toggleTask(task.section, task.id)} />
-                          <span style={{ flex: 1, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }} title={task.text}>
-                            {task.text}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             );

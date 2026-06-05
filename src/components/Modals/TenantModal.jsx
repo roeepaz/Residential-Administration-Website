@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { TenantsIcon } from '../Icons';
 
-export default function TenantModal({ isOpen, tenant, rooms = {}, onSave, onClose }) {
+export default function TenantModal({ isOpen, tenant, rooms = {}, onSave, onDelete, onClose }) {
   const [name, setName] = useState(tenant?.name || '');
   const [phone, setPhone] = useState(tenant?.phone || '');
   const [city, setCity] = useState(tenant?.city || '');
   const [section, setSection] = useState(tenant?.section || 'chogerim');
   const [roomId, setRoomId] = useState(tenant?.roomId || '');
+  const [hanfatsot, setHanfatsot] = useState(tenant?.hanfatsot || 0);
 
   if (!isOpen) return null;
 
@@ -19,7 +20,7 @@ export default function TenantModal({ isOpen, tenant, rooms = {}, onSave, onClos
   const handleSave = () => {
     const trimmedName = name.trim();
     if (!trimmedName) return;
-    onSave(trimmedName, phone.trim(), city.trim(), roomId, section);
+    onSave(trimmedName, phone.trim(), city.trim(), roomId, section, Number(hanfatsot));
   };
 
   const handleSectionChange = (e) => {
@@ -91,9 +92,35 @@ export default function TenantModal({ isOpen, tenant, rooms = {}, onSave, onClos
             ))}
           </select>
         </div>
-        <div className="modal-actions">
-          <button className="btn btn-ghost" onClick={onClose}>ביטול</button>
-          <button className="btn btn-primary" onClick={handleSave}>שמור</button>
+        <div className="modal-group">
+          <label htmlFor="tenant-hanfatsot">מספר הנפצות</label>
+          <input
+            id="tenant-hanfatsot"
+            type="number"
+            min="0"
+            placeholder="0"
+            value={hanfatsot}
+            onChange={(e) => setHanfatsot(Math.max(0, parseInt(e.target.value) || 0))}
+          />
+        </div>
+        <div className="modal-actions" style={{ justifyContent: 'space-between', width: '100%' }}>
+          {tenant && (
+            <button
+              type="button"
+              className="btn btn-danger"
+              style={{ marginInlineEnd: 'auto' }}
+              onClick={() => {
+                onDelete(tenant.id);
+                onClose();
+              }}
+            >
+              מחק דייר
+            </button>
+          )}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn btn-ghost" onClick={onClose}>ביטול</button>
+            <button className="btn btn-primary" onClick={handleSave}>שמור</button>
+          </div>
         </div>
       </div>
     </div>

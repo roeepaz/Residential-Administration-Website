@@ -49,11 +49,11 @@ export default function RoomsTab({
                           <div className="room-num">חדר {r.num}</div>
                           <div className="room-occupants">
                             {occupants.length > 0 ? (
-                              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', padding: '2px 0' }}>
                                 {occupants.map((occ) => (
                                   <span
                                     className="badge badge-blue"
-                                    style={{ fontSize: '0.7rem', cursor: 'pointer' }}
+                                    style={{ fontSize: '0.8rem', padding: '6px 12px', cursor: 'pointer' }}
                                     key={occ.id}
                                     title={`טלפון: ${occ.phone || 'אין'} | עיר: ${occ.city || 'אין'}`}
                                     onClick={() => openEditTenant(occ.id)}

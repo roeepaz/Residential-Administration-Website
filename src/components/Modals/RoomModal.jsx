@@ -53,7 +53,8 @@ export default function RoomModal({
       phone: quickTenantPhone.trim(),
       city: quickTenantCity.trim(),
       roomId: room?.id || 'temp',
-      section: section
+      section: section,
+      hanfatsot: 0
     };
     setNewTenants(prev => [...prev, newTenant]);
     setQuickTenantName('');

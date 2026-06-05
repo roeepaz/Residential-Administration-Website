@@ -52,22 +52,82 @@ export default function RotationTab({
   return (
     <div className="page">
       <div className="glass-panel card" style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <div className="card-header">
+        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div className="card-title">🔄 סבב תפקידים — חוגרים</div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              className="icon-btn"
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                fontSize: '1.3rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(34, 197, 94, 0.16)',
+                border: '2.5px solid var(--success)',
+                color: 'var(--success)',
+                cursor: 'pointer',
+                transition: 'all 200ms ease'
+              }}
+              onClick={advanceCleaner}
+              title="קדם מנקה"
+            >
+              🧹
+            </button>
+            <button
+              className="icon-btn"
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                fontSize: '1.3rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(251, 191, 36, 0.16)',
+                border: '2.5px solid var(--warning)',
+                color: 'var(--warning)',
+                cursor: 'pointer',
+                transition: 'all 200ms ease'
+              }}
+              onClick={assignGuard}
+              title="קדם שומר"
+            >
+              🛡️
+            </button>
+          </div>
         </div>
 
-        <div className="rotation-info">
+        <div className="rotation-info" style={{ gap: '12px', marginBottom: '16px' }}>
           <div
             className={`rotation-box ${currentCleanerRoom ? 'clickable' : ''}`}
             onClick={currentCleanerRoom ? handleCleanerClick : undefined}
             title={currentCleanerRoom ? "לחץ כדי לשלוח הודעה בוואטסאפ" : undefined}
+            style={{
+              padding: '8px 12px',
+              gap: '2px',
+              background: 'rgba(34, 197, 94, 0.05)',
+              borderColor: 'rgba(34, 197, 94, 0.25)',
+              borderRadius: 'var(--radius-md)'
+            }}
           >
-            <div className="label">🧹 מנקה שירותים השבוע</div>
-            <div className="value green">{currentCleanerRoom ? `חדר ${currentCleanerRoom.num}` : '—'}</div>
+            <div className="label" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>🧹 מנקה שירותים השבוע</div>
+            <div className="value green" style={{ fontSize: '1.05rem', color: 'var(--success)' }}>{currentCleanerRoom ? `חדר ${currentCleanerRoom.num}` : '—'}</div>
           </div>
-          <div className="rotation-box">
-            <div className="label">🛡️ הבא לקבל שומר</div>
-            <div className="value amber">
+          <div 
+            className="rotation-box"
+            style={{
+              padding: '8px 12px',
+              gap: '2px',
+              background: 'rgba(251, 191, 36, 0.05)',
+              borderColor: 'rgba(251, 191, 36, 0.25)',
+              borderRadius: 'var(--radius-md)'
+            }}
+          >
+            <div className="label" style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>🛡️ הבא לקבל שומר</div>
+            <div className="value amber" style={{ fontSize: '1.05rem', color: 'var(--warning)' }}>
               {nextGuardRoom ? `חדר ${nextGuardRoom.num}` : '—'}
             </div>
           </div>
@@ -80,11 +140,10 @@ export default function RotationTab({
             </div>
           ) : (
             [...roomsChogerim]
-              .sort((a, b) => (state.rotation.guardScores[a.id] || 0) - (state.rotation.guardScores[b.id] || 0))
+              .sort((a, b) => a.num.localeCompare(b.num, 'he', { numeric: true }))
               .map((r) => {
                 const isClean = currentCleanerRoom?.id === r.id;
                 const isGuard = r.id === nextGuardRoomId;
-                const count = state.rotation.guardScores[r.id] || 0;
                 const occupantNames = (state.tenants || [])
                   .filter(t => t.roomId === r.id)
                   .map(t => t.name)
@@ -99,17 +158,11 @@ export default function RotationTab({
                     <div className="room-tags">
                       {isClean && <span className="tag tag-cleaner">🧹 מנקה השבוע</span>}
                       {isGuard && <span className="tag tag-guard">🛡️ שומר הבא</span>}
-                      <span className="badge badge-blue">שמירות: {count}</span>
                     </div>
                   </div>
                 );
               })
           )}
-        </div>
-
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button className="btn btn-green" onClick={advanceCleaner}>⬆️ קדם מנקה</button>
-          <button className="btn btn-primary" onClick={assignGuard}>🛡️ הקצה שומר לחדר הבא</button>
         </div>
       </div>
     </div>

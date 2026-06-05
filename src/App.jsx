@@ -76,7 +76,7 @@ const DEFAULT_DATA = {
   ],
   rotation: {
     cleanerIndex: 0,
-    guardScores: {}
+    guardIndex: 0
   }
 };
 
@@ -89,7 +89,9 @@ export default function App() {
         const parsed = JSON.parse(saved);
         // Ensure proper keys exist
         if (!parsed.rotation) parsed.rotation = DEFAULT_DATA.rotation;
-        if (!parsed.rotation.guardScores) parsed.rotation.guardScores = {};
+        if (parsed.rotation.guardIndex === undefined) {
+          parsed.rotation.guardIndex = 0;
+        }
         if (!parsed.tasks) parsed.tasks = DEFAULT_DATA.tasks;
         if (!parsed.rooms) parsed.rooms = DEFAULT_DATA.rooms;
         if (!parsed.priorities) parsed.priorities = DEFAULT_DATA.priorities;
@@ -110,7 +112,8 @@ export default function App() {
                       phone: '',
                       city: '',
                       roomId: room.id,
-                      section: sec
+                      section: sec,
+                      hanfatsot: 0
                     };
                     parsed.tenants.push(t);
                   } else {
@@ -136,6 +139,13 @@ export default function App() {
             });
           });
         }
+        if (parsed.tenants) {
+          parsed.tenants.forEach(t => {
+            if (t.hanfatsot === undefined) {
+              t.hanfatsot = 0;
+            }
+          });
+        }
 
         return parsed;
       } catch {
@@ -157,7 +167,8 @@ export default function App() {
               phone: '',
               city: '',
               roomId: room.id,
-              section: sec
+              section: sec,
+              hanfatsot: 0
             };
             initial.tenants.push(t);
           });
@@ -239,17 +250,9 @@ export default function App() {
   const nextGuardRoomId = useMemo(() => {
     const rooms = state.rooms.chogerim || [];
     if (rooms.length === 0) return null;
-    let minScore = Infinity;
-    let minId = null;
-    rooms.forEach(r => {
-      const score = state.rotation.guardScores[r.id] || 0;
-      if (score < minScore) {
-        minScore = score;
-        minId = r.id;
-      }
-    });
-    return minId;
-  }, [state.rooms.chogerim, state.rotation.guardScores]);
+    const index = state.rotation.guardIndex ?? 0;
+    return rooms[index]?.id || null;
+  }, [state.rooms.chogerim, state.rotation.guardIndex]);
 
   const currentCleanerRoom = useMemo(() => {
     const rooms = state.rooms.chogerim || [];
@@ -291,20 +294,15 @@ export default function App() {
   };
 
   const assignGuard = () => {
-    if (!nextGuardRoomId) return;
-    setState(prev => {
-      const currentScore = prev.rotation.guardScores[nextGuardRoomId] || 0;
-      return {
-        ...prev,
-        rotation: {
-          ...prev.rotation,
-          guardScores: {
-            ...prev.rotation.guardScores,
-            [nextGuardRoomId]: currentScore + 1
-          }
-        }
-      };
-    });
+    const roomsLength = (state.rooms.chogerim || []).length;
+    if (roomsLength === 0) return;
+    setState(prev => ({
+      ...prev,
+      rotation: {
+        ...prev.rotation,
+        guardIndex: ((prev.rotation.guardIndex ?? 0) + 1) % roomsLength
+      }
+    }));
   };
 
   // ─── ACTIONS: TASKS ───
@@ -476,7 +474,31 @@ export default function App() {
     setTenantModal({ open: true, tenant: t });
   };
 
-  const handleSaveTenant = (name, phone, city, roomId, section) => {
+  const incrementHanfatsot = (id) => {
+    setState(prev => {
+      const list = (prev.tenants || []).map(t => {
+        if (t.id === id) {
+          return { ...t, hanfatsot: (t.hanfatsot || 0) + 1 };
+        }
+        return t;
+      });
+      return { ...prev, tenants: list };
+    });
+  };
+
+  const decrementHanfatsot = (id) => {
+    setState(prev => {
+      const list = (prev.tenants || []).map(t => {
+        if (t.id === id) {
+          return { ...t, hanfatsot: Math.max(0, (t.hanfatsot || 0) - 1) };
+        }
+        return t;
+      });
+      return { ...prev, tenants: list };
+    });
+  };
+
+  const handleSaveTenant = (name, phone, city, roomId, section, hanfatsot) => {
     const { tenant } = tenantModal;
 
     setState(prev => {
@@ -484,10 +506,10 @@ export default function App() {
       if (tenant?.id) {
         const idx = list.findIndex(t => t.id === tenant.id);
         if (idx !== -1) {
-          list[idx] = { ...list[idx], name, phone, city, roomId, section };
+          list[idx] = { ...list[idx], name, phone, city, roomId, section, hanfatsot: hanfatsot ?? tenant.hanfatsot ?? 0 };
         }
       } else {
-        list.push({ id: uid(), name, phone, city, roomId, section });
+        list.push({ id: uid(), name, phone, city, roomId, section, hanfatsot: hanfatsot || 0 });
       }
       return { ...prev, tenants: list };
     });
@@ -522,7 +544,10 @@ export default function App() {
       {/* TOPBAR */}
       <div className="topbar">
         <div className="topbar-right">
-          <div className="topbar-title">🏠 ניהול מגורים <span>מה"ן</span></div>
+          <div className="topbar-title">
+            <img src="/logo.png" alt="לוגו" style={{ height: '32px', width: '32px', borderRadius: '50%' }} />
+            <span>ניהול מגורים <span>מה"ן</span></span>
+          </div>
         </div>
         <div className="topbar-left">
           <div className="tabs">
@@ -543,6 +568,24 @@ export default function App() {
             </button>
             <button className={`tab-btn ${activeTab === 'priorities' ? 'active' : ''}`} onClick={() => setActiveTab('priorities')}>
               <PrioritiesIcon /> <span>עדיפויות</span>
+            </button>
+          </div>
+          {/* Mobile/Header Actions */}
+          <div className="header-actions">
+            <button
+              className={`icon-btn mobile-only ${activeTab === 'priorities' ? 'active' : ''}`}
+              onClick={() => setActiveTab('priorities')}
+              aria-label="עדיפויות"
+              style={{ color: activeTab === 'priorities' ? 'var(--success)' : 'inherit' }}
+            >
+              <PrioritiesIcon />
+            </button>
+            <button
+              className="icon-btn"
+              onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+              aria-label="שינוי ערכת נושא"
+            >
+              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
             </button>
           </div>
         </div>
@@ -594,6 +637,8 @@ export default function App() {
             openAddTenant={openAddTenant}
             openEditTenant={openEditTenant}
             deleteTenant={deleteTenant}
+            incrementHanfatsot={incrementHanfatsot}
+            decrementHanfatsot={decrementHanfatsot}
           />
         )}
 
@@ -619,7 +664,7 @@ export default function App() {
 
       {/* MODALS */}
       <TaskModal
-        key={taskModal.open ? `task-${taskModal.task?.id || 'new'}` : 'closed'}
+        key={taskModal.open ? `task-${taskModal.task?.id || 'new'}` : 'closed-task'}
         isOpen={taskModal.open}
         task={taskModal.task}
         tenants={state.tenants}
@@ -629,7 +674,7 @@ export default function App() {
       />
 
       <RoomModal
-        key={roomModal.open ? `room-${roomModal.room?.id || 'new'}-${roomModal.section}` : 'closed'}
+        key={roomModal.open ? `room-${roomModal.room?.id || 'new'}-${roomModal.section}` : 'closed-room'}
         isOpen={roomModal.open}
         room={roomModal.room}
         section={roomModal.section}
@@ -640,7 +685,7 @@ export default function App() {
       />
 
       <PriorityModal
-        key={priorityModal.open ? `priority-${priorityModal.priority?.id || 'new'}` : 'closed'}
+        key={priorityModal.open ? `priority-${priorityModal.priority?.id || 'new'}` : 'closed-priority'}
         isOpen={priorityModal.open}
         priority={priorityModal.priority}
         onSave={handleSavePriority}
@@ -648,18 +693,40 @@ export default function App() {
       />
 
       <TenantModal
-        key={tenantModal.open ? `tenant-${tenantModal.tenant?.id || 'new'}` : 'closed'}
+        key={tenantModal.open ? `tenant-${tenantModal.tenant?.id || 'new'}` : 'closed-tenant'}
         isOpen={tenantModal.open}
         tenant={tenantModal.tenant}
         rooms={state.rooms}
         onSave={handleSaveTenant}
+        onDelete={deleteTenant}
         onClose={() => setTenantModal({ open: false, tenant: null })}
       />
 
-      {/* Floating Theme Toggle */}
-      <button className="theme-toggle" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">
-        {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-      </button>
+      {/* Mobile Bottom Navigation */}
+      <div className="bottom-nav">
+        <div className="bottom-nav-inner">
+          <button className={`bottom-nav-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
+            <HomeIcon />
+            <span>סקירה</span>
+          </button>
+          <button className={`bottom-nav-btn ${activeTab === 'tasks' ? 'active' : ''}`} onClick={() => setActiveTab('tasks')}>
+            <TasksIcon />
+            <span>תקלות</span>
+          </button>
+          <button className={`bottom-nav-btn ${activeTab === 'rotation' ? 'active' : ''}`} onClick={() => setActiveTab('rotation')}>
+            <RotationIcon />
+            <span>סבב</span>
+          </button>
+          <button className={`bottom-nav-btn ${activeTab === 'tenants' ? 'active' : ''}`} onClick={() => setActiveTab('tenants')}>
+            <TenantsIcon />
+            <span>דיירים</span>
+          </button>
+          <button className={`bottom-nav-btn ${activeTab === 'rooms' ? 'active' : ''}`} onClick={() => setActiveTab('rooms')}>
+            <RoomsIcon />
+            <span>חדרים</span>
+          </button>
+        </div>
+      </div>
     </>
   );
 }
