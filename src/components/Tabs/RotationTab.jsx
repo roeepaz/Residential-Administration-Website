@@ -1,7 +1,11 @@
 
 
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
+
 // WhatsApp group invite link
-const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/EQ5XDj7Y6KaHcwM6eHRLlb';
+const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/DGD1ChySZXFKTZDsDgpMn8';
+const WHATSAPP_MISDAR_LINK = 'https://chat.whatsapp.com/I0xTb8z2dyRAdgYltapEAz';
 
 export default function RotationTab({
   state,
@@ -10,6 +14,10 @@ export default function RotationTab({
   advanceCleaner,
   assignGuard
 }) {
+  const [isMisdarModalOpen, setIsMisdarModalOpen] = useState(false);
+  const [misdarName, setMisdarName] = useState('');
+  const [misdarTime, setMisdarTime] = useState('08:30');
+
   const roomsChogerim = state.rooms.chogerim || [];
   const nextGuardRoom = roomsChogerim.find(r => r.id === nextGuardRoomId);
 
@@ -28,10 +36,15 @@ export default function RotationTab({
     const confirmMessage = `האם ברצונך לשלוח הודעת WhatsApp לגבי ${roomDetails}?`;
 
     if (window.confirm(confirmMessage)) {
-      const messageText = `חדר ${currentCleanerRoom.num} מנקה השבוע.
+      const messageText = `*תורנות ניקיון שבועית*
 
-ביום שני- פחים פלוס לכלוך באזור הכיורים.
-יום רביעי- פחים, שטיפה מלאה, כיורים`;
+*חדר ${currentCleanerRoom.num}* מנקה השבוע!
+
+*הנחיות:*
+• *יום שני:* פחים + לכלוך באזור הכיורים.
+• *יום רביעי:* פחים, שטיפה מלאה, כיורים ואסלות.
+
+תהיו חברים אחד של השני! ❤️`;
 
       // Copy to clipboard, alert user, and open group chat link
       navigator.clipboard.writeText(messageText)
@@ -42,11 +55,40 @@ export default function RotationTab({
         .catch(err => {
           console.error('Failed to copy text: ', err);
           // Fallback in case navigator.clipboard is not supported or blocked
-          const encodedText = encodeURIComponent(messageText);
-          const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
-          window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
         });
     }
+  };
+
+  const handleSendMisdarMessage = () => {
+    const trimmedName = misdarName.trim();
+    if (!trimmedName || !misdarTime) return;
+
+    const messageText = `📢 *תזכורת למסדר מגורים* 📢
+
+שלום לכולם 🤩
+
+🏡 *ביום חמישי בבוקר יתבצע מסדר מגורים עם ${trimmedName}*
+
+⏰ *שעת התחלה:* ${misdarTime} במגורי החוגרים.
+🫡 *הנוכחות חובה!*
+
+• חדר עם פערים למסדר - מוזמנים לפנות אליי כמו תמיד.
+• אם יש היעדרות - נא לעדכן בהקדם.`;
+
+    // Copy to clipboard, alert user, and open group chat link
+    navigator.clipboard.writeText(messageText)
+      .then(() => {
+        alert('הודעת המסדר הועתקה ללוח! כעת תיפתח קבוצת הוואטסאפ של המסדר, אנא הדבק (Ctrl+V) ושלח.');
+        window.open(WHATSAPP_MISDAR_LINK, '_blank', 'noopener,noreferrer');
+        setIsMisdarModalOpen(false);
+      })
+      .catch(err => {
+        console.error('Failed to copy text: ', err);
+        const encodedText = encodeURIComponent(messageText);
+        const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedText}`;
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+        setIsMisdarModalOpen(false);
+      });
   };
 
   return (
@@ -96,6 +138,27 @@ export default function RotationTab({
               title="קדם שומר"
             >
               🛡️
+            </button>
+            <button
+              className="icon-btn"
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                fontSize: '1.3rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(129, 140, 248, 0.16)',
+                border: '2.5px solid var(--indigo)',
+                color: 'var(--indigo)',
+                cursor: 'pointer',
+                transition: 'all 200ms ease'
+              }}
+              onClick={() => setIsMisdarModalOpen(true)}
+              title="הודעה על מסדר"
+            >
+              🫡
             </button>
           </div>
         </div>
@@ -165,6 +228,59 @@ export default function RotationTab({
           )}
         </div>
       </div>
+
+      {isMisdarModalOpen && createPortal(
+        <div className="modal-bg open" onClick={(e) => {
+          if (e.target.classList.contains('modal-bg')) {
+            setIsMisdarModalOpen(false);
+          }
+        }}>
+          <div className="modal" style={{ direction: 'rtl' }}>
+            <h3>📋 תזכורת למסדר מגורים</h3>
+            
+            <div className="modal-group">
+              <label htmlFor="misdar-name">שם הגורם הממסדר</label>
+              <input
+                id="misdar-name"
+                type="text"
+                placeholder="לדוגמא: לירן, נתניא"
+                value={misdarName}
+                onChange={(e) => setMisdarName(e.target.value)}
+                autoFocus
+              />
+            </div>
+
+            <div className="modal-group">
+              <label htmlFor="misdar-time">שעת המסדר (החל מ-08:30)</label>
+              <input
+                id="misdar-time"
+                type="time"
+                min="08:30"
+                value={misdarTime}
+                onChange={(e) => setMisdarTime(e.target.value)}
+                style={{
+                  fontSize: '1rem',
+                  fontFamily: 'inherit'
+                }}
+              />
+            </div>
+
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={() => setIsMisdarModalOpen(false)}>
+                ביטול
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleSendMisdarMessage}
+                disabled={!misdarName.trim() || !misdarTime}
+              >
+                העתק ושלח
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
