@@ -33,17 +33,17 @@ import { uid } from './utils/helpers';
 const DEFAULT_DATA = {
   tasks: {
     chogerim: [
-      { id: 't1', text: 'קו מים', owner: 'בתהליך', done: false },
-      { id: 't2', text: 'פינת ישיבה', owner: 'אצל נתניא', done: false }
+      { id: 't1', text: 'קו מים', owner: 'בתהליך', done: false, status: 'צריך לפתוח תקלה' },
+      { id: 't2', text: 'פינת ישיבה', owner: 'אצל נתניא', done: false, status: 'צריך לפתוח תקלה' }
     ],
     kzinim: [
-      { id: 't3', text: 'תקלה מתמשכת של הפסקות חשמל', owner: '', done: false },
-      { id: 't4', text: 'באחד החדרים יש רק שתי מיטות יחיד', owner: '', done: false },
-      { id: 't5', text: 'בעיית מקום — צריך לדלל אנשים', owner: '', done: false },
-      { id: 't6', text: 'לקדם מקום ישיבה — לדבר עם האנשים שם', owner: '', done: false }
+      { id: 't3', text: 'תקלה מתמשכת של הפסקות חשמל', owner: '', done: false, status: 'צריך לפתוח תקלה' },
+      { id: 't4', text: 'באחד החדרים יש רק שתי מיטות יחיד', owner: '', done: false, status: 'צריך לפתוח תקלה' },
+      { id: 't5', text: 'בעיית מקום — צריך לדלל אנשים', owner: '', done: false, status: 'צריך לפתוח תקלה' },
+      { id: 't6', text: 'לקדם מקום ישיבה — לדבר עם האנשים שם', owner: '', done: false, status: 'צריך לפתוח תקלה' }
     ],
     chogrot: [
-      { id: 't7', text: 'חדר חדש — הזמנת רכש ברגע שקדוש יאשר', owner: '', done: false }
+      { id: 't7', text: 'חדר חדש — הזמנת רכש ברגע שקדוש יאשר', owner: '', done: false, status: 'צריך לפתוח תקלה' }
     ]
   },
   rooms: {
@@ -147,6 +147,13 @@ export default function App() {
           });
         }
 
+        // Ensure every task has a status (migration)
+        ['chogerim', 'kzinim', 'chogrot'].forEach(sec => {
+          (parsed.tasks[sec] || []).forEach(task => {
+            if (task.status === undefined) task.status = 'צריך לפתוח תקלה';
+          });
+        });
+
         return parsed;
       } catch {
         // Fall back to new state
@@ -187,6 +194,8 @@ export default function App() {
             task.owner = '';
           }
         }
+        // Ensure default status exists on initial tasks
+        if (task.status === undefined) task.status = 'צריך לפתוח תקלה';
       });
     });
 
@@ -330,7 +339,7 @@ export default function App() {
     setTaskModal({ open: true, task: t, section });
   };
 
-  const handleSaveTask = (text, owner, assignedTenantId, contractorName, contractorPhone) => {
+  const handleSaveTask = (text, owner, assignedTenantId, contractorName, contractorPhone, status) => {
     const { task, section } = taskModal;
 
     setState(prev => {
@@ -338,10 +347,10 @@ export default function App() {
       if (task?.id) {
         const idx = list.findIndex(t => t.id === task.id);
         if (idx !== -1) {
-          list[idx] = { ...list[idx], text, owner, assignedTenantId, contractorName, contractorPhone };
+          list[idx] = { ...list[idx], text, owner, assignedTenantId, contractorName, contractorPhone, status };
         }
       } else {
-        list.push({ id: uid(), text, owner, assignedTenantId, contractorName, contractorPhone, done: false });
+        list.push({ id: uid(), text, owner, assignedTenantId, contractorName, contractorPhone, done: false, status: status || 'צריך לפתוח תקלה' });
       }
       return { ...prev, tasks: { ...prev.tasks, [section]: list } };
     });

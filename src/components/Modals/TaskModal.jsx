@@ -39,6 +39,7 @@ export default function TaskModal({ isOpen, task, tenants = [], rooms = {}, onSa
             onChange={(e) => setText(e.target.value)}
           />
         </div>
+
         <div className="modal-group">
           <label htmlFor="task-assignee">שייך לדייר (אופציונלי)</label>
           <select
@@ -60,6 +61,7 @@ export default function TaskModal({ isOpen, task, tenants = [], rooms = {}, onSa
               })}
           </select>
         </div>
+
         <div className="modal-group">
           <label htmlFor="task-contractor-name">שם בעל המקצוע (אופציונלי)</label>
           <input
@@ -70,6 +72,7 @@ export default function TaskModal({ isOpen, task, tenants = [], rooms = {}, onSa
             onChange={(e) => setContractorName(e.target.value)}
           />
         </div>
+
         <div className="modal-group">
           <label htmlFor="task-contractor-phone">טלפון בעל המקצוע (אופציונלי)</label>
           <input
@@ -80,6 +83,7 @@ export default function TaskModal({ isOpen, task, tenants = [], rooms = {}, onSa
             onChange={(e) => setContractorPhone(e.target.value)}
           />
         </div>
+
         <div className="modal-group">
           <label htmlFor="task-owner">הערת סטטוס / גורם מטפל נוסף (אופציונלי)</label>
           <input
