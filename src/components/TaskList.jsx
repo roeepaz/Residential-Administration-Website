@@ -11,7 +11,8 @@ export default function TaskList({
   toggleTask,
   openEditTenant,
   openEditTask,
-  deleteTask
+  deleteTask,
+  updateTaskStatus
 }) {
   const list = isOverview ? items.filter(t => !t.done) : items;
 
@@ -29,9 +30,19 @@ export default function TaskList({
         const tenant = t.assignedTenantId ? tenants.find(x => x.id === t.assignedTenantId) : null;
         const tenantRoom = tenant && tenant.roomId ? (rooms[tenant.section] || []).find(r => r.id === tenant.roomId) : null;
 
+        // color: red for "צריך לפתוח תקלה", green for "נפתחה תקלה", default to blue-ish
         const statusStyle = t.status === 'צריך לפתוח תקלה'
-          ? { background: 'rgba(248, 113, 113, 0.12)', color: 'var(--danger)', borderColor: 'rgba(248, 113, 113, 0.2)' }
-          : { background: 'rgba(59, 130, 246, 0.12)', color: 'var(--primary)', borderColor: 'rgba(59, 130, 246, 0.2)' };
+          ? { background: 'rgba(248, 113, 113, 0.12)', color: '#ef4444', borderColor: 'rgba(248, 113, 113, 0.2)' }
+          : t.status === 'נפתחה תקלה'
+            ? { background: 'rgba(16, 185, 129, 0.12)', color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.2)' }
+            : { background: 'rgba(59, 130, 246, 0.12)', color: 'var(--primary)', borderColor: 'rgba(59, 130, 246, 0.2)' };
+
+        const handleStatusClick = (e) => {
+          e.stopPropagation();
+          if (!updateTaskStatus) return;
+          const newStatus = t.status === 'נפתחה תקלה' ? 'צריך לפתוח תקלה' : 'נפתחה תקלה';
+          updateTaskStatus(section, t.id, newStatus);
+        };
 
         return (
           <div className={`task-item ${t.done ? 'done' : ''}`} key={t.id}>
@@ -43,6 +54,8 @@ export default function TaskList({
               {t.text}
               {t.status && (
                 <span
+                  onClick={(e) => { if (isOverview) handleStatusClick(e); }}
+                  title={isOverview ? 'לחץ כדי לשנות סטטוס' : ''}
                   style={{
                     display: 'inline-block',
                     marginRight: '8px',
@@ -51,6 +64,7 @@ export default function TaskList({
                     fontSize: '0.75rem',
                     border: '1px solid',
                     verticalAlign: 'middle',
+                    cursor: isOverview && updateTaskStatus ? 'pointer' : 'default',
                     ...statusStyle
                   }}
                 >
