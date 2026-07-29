@@ -7,8 +7,7 @@ export default function TaskModal({ isOpen, task, tenants = [], rooms = {}, onSa
   const [owner, setOwner] = useState(task?.owner || '');
   const [contractorName, setContractorName] = useState(task?.contractorName || '');
   const [contractorPhone, setContractorPhone] = useState(task?.contractorPhone || '');
-  // NEW: status field for the task
-  const [status, setStatus] = useState(task?.status || 'צריך לפתוח תקלה');
+  const [status, setStatus] = useState(task?.status || 'נפתחה תקלה');
 
   if (!isOpen) return null;
 
@@ -21,7 +20,6 @@ export default function TaskModal({ isOpen, task, tenants = [], rooms = {}, onSa
   const handleSave = () => {
     const trimmedText = text.trim();
     if (!trimmedText) return;
-    // NOTE: pass status as the last argument
     onSave(trimmedText, owner.trim(), assignedTenantId, contractorName.trim(), contractorPhone.trim(), status);
   };
 
@@ -97,14 +95,9 @@ export default function TaskModal({ isOpen, task, tenants = [], rooms = {}, onSa
           />
         </div>
 
-        {/* NEW: status selector */}
         <div className="modal-group">
           <label htmlFor="task-status">סטטוס התקלה</label>
-          <select
-            id="task-status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
+          <select id="task-status" value={status} onChange={(e) => setStatus(e.target.value)}>
             <option value="צריך לפתוח תקלה">צריך לפתוח תקלה</option>
             <option value="נפתחה תקלה">נפתחה תקלה</option>
           </select>
