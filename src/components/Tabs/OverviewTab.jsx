@@ -23,9 +23,9 @@ export default function OverviewTab({
 
       <div className="grid-3">
         {/* חוגרים תקלות */}
-        <div className="glass-panel card">
+        <div className="glass-panel card fault-section-card">
           <div className="card-header">
-            <div className="card-title">⚠️ תקלות חוגרים</div>
+            <div className="card-title">🔵 תקלות חוגרים</div>
             <span className="badge badge-blue">
               {(state.tasks.chogerim || []).filter(t => !t.done).length} פתוחות
             </span>
@@ -42,9 +42,9 @@ export default function OverviewTab({
         </div>
 
         {/* קצינים תקלות */}
-        <div className="glass-panel card">
+        <div className="glass-panel card fault-section-card">
           <div className="card-header">
-            <div className="card-title">⚠️ תקלות קצינים</div>
+            <div className="card-title">🟡 תקלות קצינים</div>
             <span className="badge badge-amber">
               {(state.tasks.kzinim || []).filter(t => !t.done).length} פתוחות
             </span>
@@ -61,9 +61,9 @@ export default function OverviewTab({
         </div>
 
         {/* חוגרות תקלות */}
-        <div className="glass-panel card">
+        <div className="glass-panel card fault-section-card">
           <div className="card-header">
-            <div className="card-title">⚠️ תקלות חוגרות</div>
+            <div className="card-title">🟢 תקלות חוגרות</div>
             <span className="badge badge-green">
               {(state.tasks.chogrot || []).filter(t => !t.done).length} פתוחות
             </span>
@@ -80,18 +80,25 @@ export default function OverviewTab({
         </div>
       </div>
 
-      <hr />
+      <hr style={{ margin: '32px 0', borderColor: 'var(--border-color)' }} />
 
       <div className="section-title">🎯 עדיפויות כלליות</div>
       <div className="glass-panel card">
         <div className="task-list">
           {(state.priorities || []).map(p => (
-            <div className={`task-item ${p.done ? 'done' : ''}`} key={p.id}>
-              <div
-                className={`task-check ${p.done ? 'checked' : ''}`}
-                onClick={() => togglePriority(p.id)}
-              />
-              <div className="task-text">{p.text}</div>
+            <div className={`task-item ${p.done ? 'done-fault' : 'open-fault'}`} key={p.id}>
+              <div className="task-item-top">
+                <button
+                  type="button"
+                  className={`status-toggle-btn ${p.done ? 'status-done' : 'status-open'}`}
+                  onClick={() => togglePriority(p.id)}
+                >
+                  {p.done ? '🟢 הושלם' : '🔴 בביצוע'}
+                </button>
+              </div>
+              <div className="task-text-container">
+                <div className={`task-text ${p.done ? 'done-text' : ''}`}>{p.text}</div>
+              </div>
             </div>
           ))}
         </div>

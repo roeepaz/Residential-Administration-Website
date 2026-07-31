@@ -11,14 +11,27 @@ export default function TaskList({
   toggleTask,
   openEditTenant,
   openEditTask,
-  deleteTask
+  deleteTask,
+  showFilter = 'all' // 'all', 'open', 'done'
 }) {
-  const list = isOverview ? items.filter(t => !t.done) : items;
+  const list = items.filter(t => {
+    const status = t.status || (t.done ? 'done' : 'open');
+    if (showFilter === 'open') return status === 'open';
+    if (showFilter === 'in_progress') return status === 'in_progress';
+    if (showFilter === 'done') return status === 'done';
+    return true;
+  });
 
   if (list.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '12px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-        אין תקלות
+      <div style={{ textAlign: 'center', padding: '16px 12px', color: 'var(--text-secondary)', fontSize: '0.88rem', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px dashed var(--border-color)' }}>
+        {showFilter === 'open'
+          ? '✨ אין תקלות במצב לפתוח'
+          : showFilter === 'in_progress'
+          ? '✨ אין תקלות שנפתחו/בטיפול'
+          : showFilter === 'done'
+          ? 'אין תקלות שטופלו'
+          : 'אין תקלות'}
       </div>
     );
   }
@@ -29,16 +42,73 @@ export default function TaskList({
         const tenant = t.assignedTenantId ? tenants.find(x => x.id === t.assignedTenantId) : null;
         const tenantRoom = tenant && tenant.roomId ? (rooms[tenant.section] || []).find(r => r.id === tenant.roomId) : null;
 
+        const currentStatus = t.status || (t.done ? 'done' : 'open');
+
+        let cardClass = 'open-fault';
+        let buttonClass = 'status-open';
+        let buttonLabel = '🔴 לפתוח תקלה';
+        let tooltipText = 'מצב: לפתוח תקלה (אדום) - לחץ למעבר לנפתחה תקלה';
+
+        if (currentStatus === 'in_progress') {
+          cardClass = 'in-progress-fault';
+          buttonClass = 'status-in-progress';
+          buttonLabel = '🟡 נפתחה תקלה';
+          tooltipText = 'מצב: נפתחה תקלה (צהוב) - לחץ למעבר לטופלה';
+        } else if (currentStatus === 'done') {
+          cardClass = 'done-fault';
+          buttonClass = 'status-done';
+          buttonLabel = '🟢 טופלה';
+          tooltipText = 'מצב: טופלה (ירוק) - לחץ למעבר בלפתוח תקלה';
+        }
+
         return (
-          <div className={`task-item ${t.done ? 'done' : ''}`} key={t.id}>
-            <div
-              className={`task-check ${t.done ? 'checked' : ''}`}
-              onClick={() => toggleTask(section, t.id)}
-            />
-            <div className="task-text">
-              {t.text}
+          <div className={`task-item ${cardClass}`} key={t.id}>
+            {/* Top row: Status Button & Actions */}
+            <div className="task-item-top">
+              <div className="task-item-status-group">
+                <button
+                  type="button"
+                  className={`status-toggle-btn ${buttonClass}`}
+                  onClick={() => toggleTask(section, t.id)}
+                  title={tooltipText}
+                >
+                  {buttonLabel}
+                </button>
+              </div>
+
+              {!isOverview && (
+                <div className="task-actions">
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    onClick={() => openEditTask(section, t.id)}
+                    aria-label="ערוך משימה"
+                  >
+                    <EditIcon />
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-btn del"
+                    onClick={() => deleteTask(section, t.id)}
+                    aria-label="מחק משימה"
+                  >
+                    <DeleteIcon />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Middle: Text content */}
+            <div className="task-text-container">
+              <div className={`task-text ${t.done ? 'done-text' : ''}`}>
+                {t.text}
+              </div>
+            </div>
+
+            {/* Bottom tags: Tenant & Contractor */}
+            <div className="task-tags">
               {tenant && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', verticalAlign: 'middle' }}>
+                <span className="task-tag-wrapper">
                   {isOverview ? (
                     <a
                       className="task-owner"
@@ -46,7 +116,7 @@ export default function TaskList({
                       style={{
                         background: 'rgba(59, 130, 246, 0.12)',
                         color: 'var(--primary)',
-                        borderColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 0.25)',
                         cursor: tenant.phone ? 'pointer' : 'not-allowed',
                         textDecoration: 'none'
                       }}
@@ -67,7 +137,7 @@ export default function TaskList({
                       style={{
                         background: 'rgba(59, 130, 246, 0.12)',
                         color: 'var(--primary)',
-                        borderColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 0.25)',
                         cursor: 'pointer'
                       }}
                       title={`טלפון: ${tenant.phone || 'אין'} | עיר: ${tenant.city || 'אין'}`}
@@ -95,8 +165,9 @@ export default function TaskList({
                   )}
                 </span>
               )}
+
               {(t.contractorName || t.contractorPhone) && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', verticalAlign: 'middle', marginRight: '8px' }}>
+                <span className="task-tag-wrapper">
                   {t.contractorPhone ? (
                     <a
                       className="task-owner"
@@ -104,10 +175,9 @@ export default function TaskList({
                       style={{
                         background: 'rgba(16, 185, 129, 0.12)',
                         color: 'var(--success)',
-                        borderColor: 'rgba(16, 185, 129, 0.2)',
+                        borderColor: 'rgba(16, 185, 129, 0.25)',
                         cursor: 'pointer',
-                        textDecoration: 'none',
-                        marginRight: 0
+                        textDecoration: 'none'
                       }}
                       title={`התקשר לבעל מקצוע (${t.contractorName || 'ללא שם'}): ${t.contractorPhone}`}
                       onClick={(e) => e.stopPropagation()}
@@ -120,8 +190,7 @@ export default function TaskList({
                       style={{
                         background: 'rgba(16, 185, 129, 0.12)',
                         color: 'var(--success)',
-                        borderColor: 'rgba(16, 185, 129, 0.2)',
-                        marginRight: 0
+                        borderColor: 'rgba(16, 185, 129, 0.25)'
                       }}
                       title="שם בעל המקצוע"
                     >
@@ -135,7 +204,6 @@ export default function TaskList({
                       rel="noreferrer"
                       className="whatsapp-link"
                       title={`שלח הודעת WhatsApp ל-${t.contractorName || 'בעל המקצוע'}`}
-                      style={{ marginRight: '6px' }}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -145,26 +213,9 @@ export default function TaskList({
                   )}
                 </span>
               )}
+
               {t.owner && <span className="task-owner">{t.owner}</span>}
             </div>
-            {!isOverview && (
-              <div className="task-actions">
-                <button
-                  className="icon-btn"
-                  onClick={() => openEditTask(section, t.id)}
-                  aria-label="ערוך משימה"
-                >
-                  <EditIcon />
-                </button>
-                <button
-                  className="icon-btn del"
-                  onClick={() => deleteTask(section, t.id)}
-                  aria-label="מחק משימה"
-                >
-                  <DeleteIcon />
-                </button>
-              </div>
-            )}
           </div>
         );
       })}

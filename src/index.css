@@ -370,6 +370,54 @@ body.light-mode .tab-btn.active {
 .badge-red { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.15); }
 .badge-indigo { background: rgba(var(--indigo-rgb), 0.1); color: var(--indigo); border: 1px solid rgba(var(--indigo-rgb), 0.15); }
 
+/* OVERVIEW FILTER BAR */
+.overview-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.filter-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filter-pill:hover {
+  color: var(--text-primary);
+  border-color: var(--border-glow);
+}
+
+.filter-pill.active {
+  background: rgba(var(--primary-rgb), 0.15);
+  color: var(--primary);
+  border-color: var(--primary);
+  font-weight: 700;
+}
+
 /* TASKS & LISTS */
 .task-list {
   display: flex;
@@ -379,87 +427,213 @@ body.light-mode .tab-btn.active {
 
 .task-item {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
   padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.02);
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
-  transition: all var(--transition-fast);
+  transition: all var(--transition-normal);
   position: relative;
 }
 
-body.light-mode .task-item {
-  background: rgba(0, 0, 0, 0.01);
-}
-
-.task-item:hover {
-  border-color: var(--border-glow);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-body.light-mode .task-item:hover {
-  background: rgba(0, 0, 0, 0.03);
-}
-
-.task-item:active {
-  transform: scale(0.995);
-}
-
-.task-item.done {
-  opacity: 0.55;
-}
-
-.task-item.done .task-text {
-  text-decoration: line-through;
-  color: var(--text-secondary);
-}
-
-/* High contrast touch target for checkbox */
-.task-check {
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
-  border: 2px solid var(--text-secondary);
-  background: transparent;
-  cursor: pointer;
-  flex-shrink: 0;
+.task-item-top {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-  position: relative;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
 }
 
-.task-check::before {
-  content: '';
-  position: absolute;
-  inset: -10px; /* Expands touch target to at least 44px */
+.task-item-status-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.task-check:hover {
-  border-color: var(--success);
-  box-shadow: 0 0 8px rgba(var(--success-rgb), 0.35);
-}
-
-.task-check.checked {
-  background: var(--success);
-  border-color: var(--success);
-}
-
-.task-check.checked::after {
-  content: '✓';
-  color: #fff;
-  font-size: 14px;
-  font-weight: 900;
+.task-text-container {
+  width: 100%;
 }
 
 .task-text {
-  flex: 1;
   font-size: 0.98rem;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.5;
   color: var(--text-primary);
+}
+
+.task-text.done-text {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.task-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.task-tag-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Open Fault Card (Delicate Red Tint & Glow) */
+.task-item.open-fault {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-right: 4px solid #ef4444;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.06);
+}
+
+body.light-mode .task-item.open-fault {
+  background: rgba(254, 226, 226, 0.55);
+  border-color: rgba(239, 68, 68, 0.3);
+  border-right-color: #dc2626;
+}
+
+.task-item.open-fault:hover {
+  background: rgba(239, 68, 68, 0.13);
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.12);
+}
+
+body.light-mode .task-item.open-fault:hover {
+  background: rgba(254, 226, 226, 0.85);
+}
+
+/* In Progress / Opened Fault Card (Delicate Yellow/Amber Tint & Glow) */
+.task-item.in-progress-fault {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  border-right: 4px solid #f59e0b;
+  box-shadow: 0 4px 14px rgba(251, 191, 36, 0.06);
+}
+
+body.light-mode .task-item.in-progress-fault {
+  background: rgba(254, 243, 199, 0.65);
+  border-color: rgba(245, 158, 11, 0.35);
+  border-right-color: #d97706;
+}
+
+.task-item.in-progress-fault:hover {
+  background: rgba(251, 191, 36, 0.14);
+  border-color: rgba(251, 191, 36, 0.45);
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.12);
+}
+
+body.light-mode .task-item.in-progress-fault:hover {
+  background: rgba(254, 243, 199, 0.9);
+}
+
+/* Resolved / Closed Fault Card (Delicate Green Tint & Glow) */
+.task-item.done-fault {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  border-right: 4px solid #22c55e;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.06);
+}
+
+body.light-mode .task-item.done-fault {
+  background: rgba(220, 252, 231, 0.55);
+  border-color: rgba(34, 197, 94, 0.3);
+  border-right-color: #16a34a;
+}
+
+.task-item.done-fault:hover {
+  background: rgba(34, 197, 94, 0.13);
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.12);
+}
+
+body.light-mode .task-item.done-fault:hover {
+  background: rgba(220, 252, 231, 0.85);
+}
+
+/* Status Toggle Button */
+.status-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  user-select: none;
+  touch-action: manipulation;
+  min-height: 36px;
+}
+
+.status-toggle-btn.status-open {
+  background: rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.38);
+}
+
+body.light-mode .status-toggle-btn.status-open {
+  background: rgba(239, 68, 68, 0.14);
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.status-toggle-btn.status-open:hover {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.45);
+  transform: scale(1.02);
+}
+
+.status-toggle-btn.status-in-progress {
+  background: rgba(251, 191, 36, 0.18);
+  color: #f59e0b;
+  border-color: rgba(251, 191, 36, 0.38);
+}
+
+body.light-mode .status-toggle-btn.status-in-progress {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.status-toggle-btn.status-in-progress:hover {
+  background: #f59e0b;
+  color: #ffffff;
+  border-color: #f59e0b;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+  transform: scale(1.02);
+}
+
+.status-toggle-btn.status-done {
+  background: rgba(34, 197, 94, 0.18);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.38);
+}
+
+body.light-mode .status-toggle-btn.status-done {
+  background: rgba(34, 197, 94, 0.14);
+  color: #15803d;
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+.status-toggle-btn.status-done:hover {
+  background: #22c55e;
+  color: #ffffff;
+  border-color: #22c55e;
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.45);
+  transform: scale(1.02);
+}
+
+.status-toggle-btn:active {
+  transform: scale(0.96);
 }
 
 .task-owner {
@@ -470,7 +644,7 @@ body.light-mode .task-item:hover {
   color: var(--text-secondary);
   padding: 4px 10px;
   border-radius: 6px;
-  margin-inline-start: 8px;
+  margin-inline-start: 4px;
   border: 1px solid var(--border-color);
   font-weight: 600;
   cursor: pointer;

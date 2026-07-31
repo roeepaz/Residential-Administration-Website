@@ -308,7 +308,22 @@ export default function App() {
   // ─── ACTIONS: TASKS ───
   const toggleTask = (section, id) => {
     setState(prev => {
-      const list = prev.tasks[section].map(t => t.id === id ? { ...t, done: !t.done } : t);
+      const list = prev.tasks[section].map(t => {
+        if (t.id === id) {
+          const currentStatus = t.status || (t.done ? 'done' : 'open');
+          let nextStatus = 'in_progress';
+          if (currentStatus === 'open') nextStatus = 'in_progress';
+          else if (currentStatus === 'in_progress') nextStatus = 'done';
+          else if (currentStatus === 'done') nextStatus = 'open';
+
+          return {
+            ...t,
+            status: nextStatus,
+            done: nextStatus === 'done'
+          };
+        }
+        return t;
+      });
       return { ...prev, tasks: { ...prev.tasks, [section]: list } };
     });
   };
